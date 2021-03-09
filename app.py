@@ -53,11 +53,19 @@ def annotate(filename, threshold):
         y_min = int(box_center_y - box_height/2)
         y_max = int(box_center_y + box_height/2)
 
-        boxColor = (int(255 * (1 - (confidence ** 2))), int(255 * (confidence ** 2)), 0)
-        drw.rectangle([x_min, y_min, x_max, y_max], fill=None, outline=boxColor, width=3)
-        txt_width, txt_height = drw.textsize(label, font=font)
-        drw.rectangle([x_min, y_min-(txt_height+4), x_min+txt_width+4, y_min], fill=boxColor, outline=boxColor, width=3)
-        drw.text((x_min+2, y_min-(txt_height+2)), label, (255, 255, 255), font=font)
+        # boxColor = (int(255 * (1 - (confidence  2))), int(255 * (confidence  2)), 0)
+        # if int(confidence) >= 90:
+        #     boxColor = (0, 255, 0)
+        # elif 70 <= int(confidence) & int(confidence) < 90:
+        #     boxColor = (255, 255, 0)
+        # else:
+        #     boxColor = (255, 0, 0)
+        boxColor = class_colors[label]
+        
+        drw.rectangle([x_min, y_min, x_max, y_max], fill=None, outline=boxColor, width=1)
+        txt_width, txt_height = drw.textsize(f"{label} {confidence}", font=font)
+        drw.rectangle([x_min, y_min-(txt_height+4), x_min+txt_width+4, y_min], fill=boxColor, outline=boxColor, width=1)
+        drw.text((x_min+2, y_min-(txt_height+2)), f"{label} {confidence}", (0, 0, 0), font=font)
     img.save(filename)
 
 def detect_from_url(url, threshold):

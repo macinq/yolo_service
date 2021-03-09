@@ -90,8 +90,6 @@ ENV config_file=${config_file}
 ENV meta_file=${meta_file}
 
 # Download trained weights for model:
-RUN if ["${pre}" = "1"] ; then \
-        wget ${download_url}${weights_file} ; \
-        fi
+RUN if [ "${pre}" = "1" ] ; then wget ${download_url}${weights_file} ; fi
 
 CMD ["python3", "app.py"]
