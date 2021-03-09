@@ -13,6 +13,8 @@ RUN apt-get install -y wget curl git build-essential
 ARG cuda=0
 # Compile with support for Tensor Cores?
 ARG cuda_tc=0
+# Do you need pre-trained weights?
+ARG pre=0
 
 # Get and compile darknet
 WORKDIR /src
@@ -88,6 +90,8 @@ ENV config_file=${config_file}
 ENV meta_file=${meta_file}
 
 # Download trained weights for model:
-RUN wget ${download_url}${weights_file}
+RUN if ["${pre}" = "1"] ; then \
+        wget ${download_url}${weights_file} ; \
+        fi
 
 CMD ["python3", "app.py"]
