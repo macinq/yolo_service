@@ -27,12 +27,6 @@ docker build -t $DOCKER_REPO:1.0-yolov4_coco \
 	--build-arg download_url="https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/" \
 		.
 
-docker build -t $DOCKER_REPO:1.0-yolov4_tiny_3l_custom \
-	--build-arg weights_file="custom-yolov4-tiny-3l-detector_best.weights" \
-	--build-arg config_file="data/custom-yolov4-tiny-3l-detector.cfg" \
-	--build-arg meta_file="data/coco.data" \
-		.
-
 # CUDA builds
 docker build -t $DOCKER_REPO:1.0_cuda10.0-yolov3_coco \
 	--build-arg weights_file="yolov3.weights" \

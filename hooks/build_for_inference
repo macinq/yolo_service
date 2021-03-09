@@ -1,0 +1,33 @@
+#!/bin/bash
+set -ex
+
+# Base builds
+docker build -t 1.0-yolov4_tiny_3l_custom \
+  --build-arg weights_file="data/custom-yolov4-tiny-3l-detector_best.weights" \
+  --build-arg config_file="data/custom-yolov4-tiny-3l-detector.cfg" \
+  --build-arg meta_file="data/coco.data" \
+  --build-arg download_url="https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v4_pre/" \
+    .
+
+# CUDA builds
+docker build -t 1.0_cuda10.0-yolov4_tiny_3l_custom \
+	--build-arg weights_file="data/custom-yolov4-tiny-3l-detector_best.weights" \
+  	--build-arg config_file="data/custom-yolov4-tiny-3l-detector.cfg" \
+  	--build-arg meta_file="data/coco.data" \
+	--build-arg download_url="https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v4_pre/" \
+	--build-arg build_image="nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04" \
+	--build-arg app_image="nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04" \
+	--build-arg cuda=1 \
+       	. 
+
+# CUDA with Tensor Cores build
+docker build -t 1.0_cuda10.0_tc-yolov4_tiny_3l_custom \
+	--build-arg weights_file="data/custom-yolov4-tiny-3l-detector_best.weights" \
+  	--build-arg config_file="data/custom-yolov4-tiny-3l-detector.cfg" \
+  	--build-arg meta_file="data/coco.data" \
+	--build-arg download_url="https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v4_pre/" \
+	--build-arg build_image="nvidia/cuda:10.0-cudnn7-devel-ubuntu18.04" \
+	--build-arg app_image="nvidia/cuda:10.0-cudnn7-runtime-ubuntu18.04" \
+	--build-arg cuda=1 \
+	--build-arg cuda_tc=1 \
+       	. 

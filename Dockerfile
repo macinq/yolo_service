@@ -7,7 +7,7 @@ FROM ${build_image} AS build
 ENV TZ=Europe/Moscow
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update
-RUN apt-get install -y wget curl git build-essential tcl pkg-config python3-opencv libopencv-dev
+RUN apt-get install -y wget curl git build-essential
 
 # Should CUDA be enabled?
 ARG cuda=0
@@ -19,8 +19,7 @@ WORKDIR /src
 RUN git clone -n https://github.com/AlexeyAB/darknet.git
 WORKDIR /src/darknet
 RUN git checkout 38a164bcb9e017f8c9c3645a39419320e217545e
-RUN sed -i -e "s/OPENCV=0/OPENCV=1/g" Makefile && \
-    sed -i -e "s!OPENMP=0!OPENMP=1!g" Makefile && \
+RUN sed -i -e "s!OPENMP=0!OPENMP=1!g" Makefile && \
     sed -i -e "s!AVX=0!AVX=1!g" Makefile && \
     sed -i -e "s!LIBSO=0!LIBSO=1!g" Makefile && \
     sed -i -e "s!GPU=0!GPU=${cuda}!g" Makefile && \
@@ -35,6 +34,8 @@ RUN make
 
 # App image:
 FROM ${app_image}
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Bare-bones python install
 RUN apt-get update && \
@@ -58,7 +59,7 @@ RUN wget https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_o
 # Reconfigure to avoid out-of-memory errors
 RUN sed -i -e "s!subdivisions=8!subdivisions=64!g" yolov4.cfg
 
-# Get cfg-file and weights
+# Get cfg and weights for inference
 RUN curl -L -o custom-yolov4-tiny-3l-detector.cfg https://www.dropbox.com/s/whj9b7x5saq1wza/custom-yolov4-tiny-3l-detector.cfg?dl=0
 RUN curl -L -o custom-yolov4-tiny-3l-detector_best.weights https://www.dropbox.com/s/qvzhm26j07zj1q3/custom-yolov4-tiny-3l-detector_best.weights?dl=0
 RUN curl -L -o coco.names https://www.dropbox.com/s/vm6r9wqhmcctvvq/obj.names?dl=0
