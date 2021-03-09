@@ -39,7 +39,7 @@ RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Bare-bones python install
 RUN apt-get update && \
-    apt-get install -y libgomp1 wget unzip && \
+    apt-get install -y libgomp1 wget curl unzip && \
     apt-get install -y --no-install-recommends python3-pip && \
     apt-get install -y python3-setuptools && \
     pip3 install --no-cache-dir wheel && \
