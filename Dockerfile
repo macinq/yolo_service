@@ -4,8 +4,10 @@ ARG app_image="ubuntu:18.04"
 
 # Build image
 FROM ${build_image} AS build
+ENV TZ=Europe/Moscow
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 RUN apt-get update
-RUN apt-get install -y build-essential git
+RUN apt-get install -y wget curl git build-essential tcl pkg-config python3-opencv libopencv-dev
 
 # Should CUDA be enabled?
 ARG cuda=0
@@ -17,13 +19,19 @@ WORKDIR /src
 RUN git clone -n https://github.com/AlexeyAB/darknet.git
 WORKDIR /src/darknet
 RUN git checkout 38a164bcb9e017f8c9c3645a39419320e217545e
-RUN sed -i -e "s!OPENMP=0!OPENMP=1!g" Makefile && \
+RUN sed -i -e "s/OPENCV=0/OPENCV=1/g" Makefile && \
+    sed -i -e "s!OPENMP=0!OPENMP=1!g" Makefile && \
     sed -i -e "s!AVX=0!AVX=1!g" Makefile && \
     sed -i -e "s!LIBSO=0!LIBSO=1!g" Makefile && \
     sed -i -e "s!GPU=0!GPU=${cuda}!g" Makefile && \
     sed -i -e "s!CUDNN=0!CUDNN=${cuda}!g" Makefile && \
-    sed -i -e "s!CUDNN_HALF=0!CUDNN_HALF=${cuda_tc}!g" Makefile && \
-    make
+    sed -i -e "s!CUDNN_HALF=0!CUDNN_HALF=${cuda_tc}!g" Makefile
+    
+# Frames resizing
+RUN sed -i 's/get_label_v3(alphabet, labelstr, (im.h\*.02))/get_label_v3(alphabet, labelstr, (im.h\*.005))/g' src/image.c
+RUN sed -i 's/width = im.h \* .002/width = im.h \* .001/g' src/image.c
+    
+RUN make
 
 # App image:
 FROM ${app_image}
@@ -49,6 +57,13 @@ RUN mv yolov4.cfg yolov4.cfg.github
 RUN wget https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.cfg
 # Reconfigure to avoid out-of-memory errors
 RUN sed -i -e "s!subdivisions=8!subdivisions=64!g" yolov4.cfg
+
+# Get cfg-file and weights
+RUN curl -L -o custom-yolov4-tiny-3l-detector.cfg https://www.dropbox.com/s/whj9b7x5saq1wza/custom-yolov4-tiny-3l-detector.cfg?dl=0
+RUN curl -L -o custom-yolov4-tiny-3l-detector_best.weights https://www.dropbox.com/s/qvzhm26j07zj1q3/custom-yolov4-tiny-3l-detector_best.weights?dl=0
+RUN curl -L -o coco.names https://www.dropbox.com/s/vm6r9wqhmcctvvq/obj.names?dl=0
+RUN curl -L -o obj.names https://www.dropbox.com/s/vm6r9wqhmcctvvq/obj.names?dl=0
+RUN curl -L -o coco.data https://www.dropbox.com/s/ca7ljhmomtw15p0/obj.data?dl=0
 
 # Install api
 WORKDIR /app

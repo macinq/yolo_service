@@ -38,7 +38,7 @@ def annotate(filename, threshold):
     detections = detect(filename, threshold)
     img = Image.open(filename)
     drw = ImageDraw.Draw(img)
-    font = ImageFont.truetype(r'DejaVuSans.ttf', 16)
+    font = ImageFont.truetype(r'DejaVuSans.ttf', 10)
     for detection in detections:
         label = detection[0]
         confidence = detection[1]
