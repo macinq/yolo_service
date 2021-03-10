@@ -12,6 +12,9 @@ from PIL import Image
 from PIL import ImageFont
 from PIL import ImageDraw
 
+TRANSPARENCY = .10
+OPACITY = int(255 * TRANSPARENCY)
+
 # Setup handler to catch SIGTERM from Docker
 def sigterm_handler(_signo, _stack_frame):
     print('Sigterm caught - closing down')
@@ -63,9 +66,9 @@ def annotate(filename, threshold):
         boxColor = class_colors[label]
         
         drw.rectangle([x_min, y_min, x_max, y_max], fill=None, outline=boxColor, width=1)
-        txt_width, txt_height = drw.textsize(f"{label} {confidence}", font=font)
-        drw.rectangle([x_min, y_min-(txt_height+4), x_min+txt_width+4, y_min], fill=boxColor, outline=boxColor, width=1)
-        drw.text((x_min+2, y_min-(txt_height+2)), f"{label} {confidence}", (0, 0, 0), font=font)
+        txt_width, txt_height = drw.textsize(f"{label} {round(int(confidence))}%", font=font)
+        drw.rectangle([x_min, y_min-(txt_height+4), x_min+txt_width+4, y_min], fill=boxColor+(OPACITY,), outline=boxColor, width=1)
+        drw.text((x_min+2, y_min-(txt_height+2)), f"{label} {round(int(confidence))}%", (0, 0, 0), font=font)
     img.save(filename)
 
 def detect_from_url(url, threshold):
